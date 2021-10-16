@@ -3,6 +3,7 @@ const axios = require('axios')
 const fs = require('fs')
 const { File } = require('megajs')
 const byteSize = require('byte-size')
+const path = require('path')
 
 
 
@@ -16,12 +17,13 @@ bot.launch((console.log('Iniciado')))
 bot.on('message',  async (ctx) => {
     if(ctx.message.text.includes('mega.nz', 'mega.co.nz')){
         ctx.reply('Olá ' + ctx.chat.first_name + ', tudo bem? Estamos analisando seu link, aguarde um pouquinho...')
-
+        console.log('[TIMESTAMP] New link received.')
         const file = File.fromURL(ctx.message.text)
 
         file.loadAttributes((error, file) => {
             if(file.directory) {
                 ctx.reply('Puts... infelizmente o download de diretórios ainda não é suportado...')
+                console.log('[TIMESTAMP] Directory')
                 return
             }
             size = byteSize(file.size)
@@ -32,28 +34,16 @@ Tamanho: ${size}
             
 Realizando download, enviaremos assim que possível.`)
             
-            extension = file.name.split('.')
-            file.download((err, data) => {
+            
+            file.download(async (err, data) => {
                 if(err) throw err
-                //if(extension === 'mp4'){ctx.replyWithVideo(data)}
-                ctx.reply(extension[1])
-             //else if(extension === 'jpg' && extension === 'png' && extension === 'jpeg') {ctx.replyWithPhoto(data)}
-                if(extension[1] === 'mp4'){
-                    ctx.replyWithVideo({
-                        source: data
-                    })
-                }
-                else if(extension[1] === 'jpg'){
-                    ctx.replyWithPhoto({
-                        source: data
-                    })
-                }
-                else {
-                    ctx.reply('O formato do arquivo não foi reconhecido, enviando como arquivo.')
-                    ctx.replyWithDocument({
-                        source: data
-                    })
-                }
+                let extension = path.extname(file.name)
+                console.log('[TIMESTAMP] File is: ' + extension)
+                //process.exit()
+                await ctx.replyWithDocument({source: data, filename: `Downloaded with @MegaDownloads${extension}`})
+
+                console.log('[TIMESTAMP] File sended')
+                //ctx.replyWithPhoto({source: data})
             })
         })
         
