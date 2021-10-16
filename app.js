@@ -20,7 +20,7 @@ bot.on('message',  async (ctx) => {
         console.log('[TIMESTAMP] New link received.')
         const file = File.fromURL(ctx.message.text)
 
-        file.loadAttributes((error, file) => {
+        await file.loadAttributes((error, file) => {
             if(file.directory) {
                 ctx.reply('Puts... infelizmente o download de diretórios ainda não é suportado...')
                 console.log('[TIMESTAMP] Directory')
